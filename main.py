@@ -63,7 +63,7 @@ class SentinelMobileApp(App):
         self.info_label.text = text_string
 
     def trigger_ota_check(self, instance):
-        self.safe_ui_update("Querying remote cloud server for binary matrix updates...")
+        self.safe_ui_update("Querying remote cloud server for updates...")
         threading.Thread(target=self.query_github_for_updates, daemon=True).start()
 
     def query_github_for_updates(self):
@@ -87,9 +87,9 @@ class SentinelMobileApp(App):
                     Clock.schedule_once(lambda dt: self.safe_ui_update(f"Update Found ({latest_version})! Redirecting..."), 0)
                     webbrowser.open(download_url)
                 else:
-                    Clock.schedule_once(lambda dt: self.safe_ui_update("System up to date. Running latest firmware release."), 0)
-        except Exception as e:
-            Clock.schedule_once(lambda dt: self.safe_ui_update(f"OTA Check Failed: Network error or bad API path."), 0)
+                    Clock.schedule_once(lambda dt: self.safe_ui_update("System up to date. Running latest release."), 0)
+        except Exception:
+            Clock.schedule_once(lambda dt: self.safe_ui_update("OTA Check Failed: Network error or bad API path."), 0)
 
     def start_camera_server(self):
         """Main camera acquisition loop. Shakes hands over TCP and streams downscaled frames."""
@@ -121,7 +121,7 @@ class SentinelMobileApp(App):
                     # Downscale resolution to 320x240 to keep network throughput ultra-fast
                     frame = cv2.resize(frame, (320, 240)) 
                     
-                    # Compress raw arrays into web-friendly, lightweight JPEG format
+                    # Compress raw arrays into lightweight JPEG format
                     _, encoded_frame = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 40])
                     
                     # Package frame payload structure
