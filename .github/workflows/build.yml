@@ -1,41 +1,37 @@
-name: HISS
+name: Flutter Cloud APK Build
 
 on:
   push:
-    branches:
-      - main
-  workflow_dispatch:
+    branches: [ main ]
+  workflow_dispatch: 
 
 jobs:
   build:
-    runs-on: ubuntu-22.04  # Stable Ubuntu LTS version for older NDK structures
+    runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v4
+      - name: Checkout Repository Code
+        uses: actions/checkout@v4
 
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
+      - name: Set up Java Development Kit
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
 
-    - name: Install System Compilation Dependencies
-      run: |
-        sudo apt update
-        sudo apt install -y git zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
-        export PIP_BREAK_SYSTEM_PACKAGES=1
-        pip3 install --upgrade pip setuptools virtualenv "Cython<3.0.0"
+      - name: Set up Flutter SDK Environment
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
 
-    - name: Build with Buildozer
-      uses: ArtemSBulgakov/buildozer-action@v1
-      id: buildozer
-      with:
-        workdir: .
-        buildozer_version: master
-        command: export PIP_BREAK_SYSTEM_PACKAGES=1; buildozer android debug
+      - name: Install Network & Camera Packages
+        run: flutter pub get
 
-    - name: Upload APK Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: SentinelMobile-APK
-        path: ${{ steps.buildozer.outputs.filename }}
+      - name: Compile Standalone APK Binary
+        run: flutter build apk --debug
+
+      - name: Upload Exported APK to Dashboard
+        uses: actions/upload-artifact@v4
+        with:
+          name: sentinel-camera-app
+          path: build/app/outputs/flutter-apk/app-debug.apk
