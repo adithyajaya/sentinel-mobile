@@ -27,8 +27,8 @@ jobs:
       - name: Install Network & Camera Packages
         run: flutter pub get
 
-      - name: Compile Standalone APK Binary
-        run: flutter build apk --debug
+      - name: Compile Universal Fat APK Binary
+        run: flutter build apk --debug --target-platform android-arm,android-arm64,android-x64
 
       - name: Upload Exported APK to Dashboard
         uses: actions/upload-artifact@v4
