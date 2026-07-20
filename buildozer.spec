@@ -1,19 +1,31 @@
-[app]
-title = Sentinel Mobile
-package.name = sentinelmobile
-package.domain = org.sentinel
+name: HISS
 
-source.dir = .
-source.include_exts = py,png,jpg,kv,atlas
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
-version = 1.0.0
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-# Requirements needed by your app
-requirements = python3,kivy,opencv-python,numpy
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
 
-orientation = portrait
-osx.kivy_version = 2.2.1
+    - name: Build with Buildozer
+      uses: ArtemSBulgakov/buildozer-action@v1
+      id: buildozer
+      with:
+        workdir: .
+        buildozer_version: master
+        command: buildozer android debug
 
-[buildozer]
-log_level = 2
-warn_on_root = 1
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: SentinelMobile-APK
+        path: ${{ steps.buildozer.outputs.filename }}
